@@ -21,6 +21,7 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import resnet as customized_models
 
 import moco.loader
 import moco.builder
@@ -28,6 +29,12 @@ import moco.builder
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
+
+customized_models_names = sorted(name for name in customized_models.__dict__
+    if name.islower() and not name.startswith("__")
+    and callable(customized_models.__dict__[name]))
+model_names = model_names + customized_models_names
+print(model_names)
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR',
@@ -96,6 +103,7 @@ parser.add_argument('--aug-plus', action='store_true',
                     help='use moco v2 data augmentation')
 parser.add_argument('--cos', action='store_true',
                     help='use cosine lr schedule')
+parser.add_argument('--save', required=True, type=str)
 
 
 def main():
@@ -157,7 +165,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # create model
     print("=> creating model '{}'".format(args.arch))
     model = moco.builder.MoCo(
-        models.__dict__[args.arch],
+        customized_models.__dict__[args.arch],
         args.moco_dim, args.moco_k, args.moco_m, args.moco_t, args.mlp)
     print(model)
 
@@ -272,7 +280,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
-            }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch))
+            }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch), save_dir=args.save)
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -322,10 +330,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.display(i)
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, filename='checkpoint.pth.tar', save_dir='./'):
+    filename = os.path.join(save_dir, filename)
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, os.path.join(save_dir, 'model_best.pth.tar'))
 
 
 class AverageMeter(object):
