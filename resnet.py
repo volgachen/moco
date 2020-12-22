@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 
 
-__all__ = ['resnet18_modified01', 'resnet18_modified02', 'resnet18_modified03', 'resnet18_modified04']
+__all__ = ['resnet18_modified01', 'resnet18_modified02', 'resnet18_modified03', 'resnet18_modified04',
+           'resnet50_modified01', 'resnet50_modified02', 'resnet50_modified03', 'resnet50_modified04']
 
 
 
@@ -227,14 +228,26 @@ def resnet50(channels=[64, 128, 256, 512], pretrained=False, progress=True, **kw
 
 
 
-def resnet18_modified01():
-    return resnet18([32, 144, 286, 648])
+def resnet18_modified01(pretrained=False, progress=True, **kwargs):
+    return resnet18([32, 144, 286, 648], pretrained=pretrained, progress=progress, **kwargs)
 
-def resnet18_modified02():
-    return resnet18([24, 132, 280, 736])
+def resnet18_modified02(pretrained=False, progress=True, **kwargs):
+    return resnet18([24, 132, 280, 736], pretrained=pretrained, progress=progress, **kwargs)
 
-def resnet18_modified03():
-    return resnet18([24, 72, 360, 736])
+def resnet18_modified03(pretrained=False, progress=True, **kwargs):
+    return resnet18([24, 72, 360, 736], pretrained=pretrained, progress=progress, **kwargs)
 
-def resnet18_modified04():
-    return resnet18([72, 164, 200, 312])
+def resnet18_modified04(pretrained=False, progress=True, **kwargs):
+    return resnet18([72, 164, 200, 312], pretrained=pretrained, progress=progress, **kwargs)
+
+def resnet50_modified01(pretrained=False, progress=True, **kwargs):
+    return resnet50([32, 120, 284, 640], pretrained=pretrained, progress=progress, **kwargs)
+
+def resnet50_modified02(pretrained=False, progress=True, **kwargs):
+    return resnet50([24, 96, 300, 736], pretrained=pretrained, progress=progress, **kwargs)
+
+def resnet50_modified03(pretrained=False, progress=True, **kwargs):
+    return resnet50([24, 72, 320, 720], pretrained=pretrained, progress=progress, **kwargs)
+
+def resnet50_modified04(pretrained=False, progress=True, **kwargs):
+    return resnet50([72, 160, 224, 320], pretrained=pretrained, progress=progress, **kwargs)

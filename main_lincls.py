@@ -20,10 +20,19 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import resnet as customized_models
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
+
+customized_models_names = sorted(name for name in customized_models.__dict__
+    if name.islower() and not name.startswith("__")
+    and callable(customized_models.__dict__[name]))
+model_names = model_names + customized_models_names
+for name in customized_models.__dict__:
+    if name.islower() and not name.startswith("__") and callable(customized_models.__dict__[name]):
+        models.__dict__[name] = customized_models.__dict__[name]
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR',
@@ -79,6 +88,8 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
 
 parser.add_argument('--pretrained', default='', type=str,
                     help='path to moco pretrained checkpoint')
+parser.add_argument('--save', default='./', type=str,
+                    help='path to save checkpoint')
 
 best_acc1 = 0
 
@@ -300,7 +311,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'state_dict': model.state_dict(),
                 'best_acc1': best_acc1,
                 'optimizer' : optimizer.state_dict(),
-            }, is_best)
+            }, is_best, filename='checkpoint_{:04d}.pth.tar'.format(epoch), save_dir = args.save)
             if epoch == args.start_epoch:
                 sanity_check(model.state_dict(), args.pretrained)
 
@@ -401,10 +412,11 @@ def validate(val_loader, model, criterion, args):
     return top1.avg
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, filename='checkpoint.pth.tar', save_dir='./'):
+    filename = os.path.join(save_dir, filename)
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, os.path.join(save_dir, 'model_best.pth.tar'))
 
 
 def sanity_check(state_dict, pretrained_weights):

@@ -34,7 +34,6 @@ customized_models_names = sorted(name for name in customized_models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(customized_models.__dict__[name]))
 model_names = model_names + customized_models_names
-print(model_names)
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR',
