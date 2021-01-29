@@ -33,6 +33,10 @@ model_names = sorted(name for name in models.__dict__
 customized_models_names = sorted(name for name in customized_models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(customized_models.__dict__[name]))
+for name in customized_models.__dict__:
+    if name.islower() and not name.startswith("__") and callable(customized_models.__dict__[name]):
+        if name not in model_names:
+            models.__dict__[name]=customized_models.__dict__[name]
 model_names = model_names + customized_models_names
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -164,7 +168,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # create model
     print("=> creating model '{}'".format(args.arch))
     model = moco.builder.MoCo(
-        customized_models.__dict__[args.arch],
+        models.__dict__[args.arch],
         args.moco_dim, args.moco_k, args.moco_m, args.moco_t, args.mlp)
     print(model)
 
